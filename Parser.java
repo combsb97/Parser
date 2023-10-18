@@ -21,6 +21,7 @@ Note: Treat Identifier and Literal as terminal symbols. Every symbol inside " an
 public class Parser{
   private Token currentToken;
   Scanner scanner;
+  boolean many_stmt = true, many_pair = true, cond = true;
 
   private void accept(byte expectedKind) {
     if (currentToken.kind == expectedKind)
@@ -66,31 +67,44 @@ public class Parser{
   //Statements --> Stmt*
   private void parseStatements(){
     System.out.println("Entering parseStatements()");
-    parseStmt();
+    while(many_stmt) {
+      parseStmt();
+    }
     System.out.println("Exiting parseStatements()");
   }
 
   //Stmt --> "(" {NullStatement | Assignment | Conditional | Loop | Block}")".
   private void parseStmt(){
     System.out.println("Entering parseStmt()");
+    boolean flag = true;
     accept(Token.LPAREN);
-    if(currentToken.kind == Token.SKIP){
-      parseNullStatement();
-    }
-    if(currentToken.kind == Token.ASSIGN){
-      parseAssignment();
-    }
-    if(currentToken.kind == Token.CONDITIONAL){
-      parseConditional();
-    }
-    if(currentToken.kind == Token.LOOP){
-      parseLoop();
-    }
-    if(currentToken.kind == Token.BLOCK){
-      parseBlock();
+    while(flag) {
+      if (currentToken.kind == Token.SKIP) {
+        parseNullStatement();
+      } else if (currentToken.kind == Token.ASSIGN) {
+        parseAssignment();
+      } else if (currentToken.kind == Token.CONDITIONAL) {
+        cond = false;
+        parseConditional();
+        cond = true;
+      } else if (currentToken.kind == Token.LOOP) {
+        cond = false;
+        parseLoop();
+        cond = true;
+      } else if (currentToken.kind == Token.BLOCK) {
+        parseBlock();
+      }
+      else
+        flag = false;
     }
     accept(Token.RPAREN);
     System.out.println("Exiting parseStmt()");
+
+    if(cond){
+      if(currentToken.kind == Token.RPAREN){
+        many_stmt = false;
+      }
+    }
   }
 
   //State -->  "("Pairs")".
@@ -105,7 +119,9 @@ public class Parser{
   //Pairs --> Pair*.
   private void parsePairs(){
     System.out.println("Entering parsePairs()");
-    parsePair();
+    while(many_pair) {
+      parsePair();
+    }
     System.out.println("Exiting parsePairs()");
   }
 
@@ -117,6 +133,9 @@ public class Parser{
     accept(Token.LITERAL);
     accept(Token.RPAREN);
     System.out.println("Exiting parsePair()");
+    if(currentToken.kind == Token.RPAREN){
+      many_pair = false;
+    }
   }
 
   //NullStatement --> skip.

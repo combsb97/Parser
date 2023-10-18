@@ -62,6 +62,7 @@ You should get the following error messges:
 */
 
 import java.io.*;
+import java.util.concurrent.LinkedTransferQueue;
 
 public class Scanner{
   private char currentChar;
@@ -228,9 +229,12 @@ public class Scanner{
           }
         }
         else if(isDigit(currentChar)){
+          String literal = "";
           while(isDigit(currentChar)){
+            literal += currentChar;
             takeIt();
           }
+          print(line, literal, toCurrentKind);
           return Token.LITERAL;
         }
     }
