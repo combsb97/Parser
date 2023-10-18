@@ -1,4 +1,5 @@
 /*
+Ben Combs
 1. You do not need a separate token (number) for each operator. All of them should be translated to one token (number) which is OPERATOR. See below
 2. In the switch the code for identifier and literal is complete. Do not change it
 
@@ -70,7 +71,8 @@ public class Scanner{
   private StringBuffer currentSpelling;
   private BufferedReader inFile;
   private static int line = 1;
-  private static int idx = 1;
+  // I added these for debugging
+  private static int idx = 1; //char position in line
 
   public Scanner(BufferedReader inFile){
     this.inFile = inFile;
@@ -113,9 +115,8 @@ public class Scanner{
         System.out.println(e);
     }
   }
-
   private void print(int line, String c, byte kind){
-    System.out.println("Line "+ line + " sentence \"" + c + "\" kind " + kind);
+    System.out.println("Line: "+ line + ", spelling = [" + c + "], kind = " + kind);
   }
 
   private byte scanToken(){
@@ -139,103 +140,66 @@ public class Scanner{
         takeIt();
         break;
 
-      case '+':
+      case '+', '-', '*', '/', '=':
         toCurrentKind = Token.OPERATOR;
         print(line, String.valueOf(currentChar), toCurrentKind);
         takeIt();
         break;
 
-      case '*':
+      case '>', '<', '!':
         toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
         takeIt();
+        if(currentChar == '='){
+          takeIt();
+        }
+        print(line, currentSpelling.toString(), toCurrentKind);
         break;
-
-      case '/':
-        toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
-        takeIt();
-        break;
-
-      case '-':
-        toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
-        takeIt();
-        break;
-
-      case '>':
-        toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
-        takeIt();
-        break;
-
-      case'<':
-        toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
-        takeIt();
-        break;
-
-      case'!':
-        toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
-        takeIt();
-        break;
-
-      case'=':
-        toCurrentKind = Token.OPERATOR;
-        print(line, String.valueOf(currentChar), toCurrentKind);
-        takeIt();
-        break;
-
+        
       default:
         if(isLetter(currentChar)){
-          String s1 = "";
           while(isLetter(currentChar)){
-            s1 += currentChar;
             takeIt();
           }
-          switch (s1) {
+          switch (currentSpelling.toString()) {
             case "Loop":
               toCurrentKind = Token.LOOP;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             case "Skip":
               toCurrentKind = Token.SKIP;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             case "assign":
               toCurrentKind = Token.ASSIGN;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             case "block":
               toCurrentKind = Token.BLOCK;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             case "conditional":
               toCurrentKind = Token.CONDITIONAL;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             case "and":
               toCurrentKind = Token.AND;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             case "or":
               toCurrentKind = Token.OR;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
               break;
             default:
               toCurrentKind = Token.IDENTIFIER;
-              print(line, s1, toCurrentKind);
+              print(line, currentSpelling.toString(), toCurrentKind);
           }
         }
         else if(isDigit(currentChar)){
-          String literal = "";
+          toCurrentKind = Token.LITERAL;
           while(isDigit(currentChar)){
-            literal += currentChar;
             takeIt();
           }
-          print(line, literal, toCurrentKind);
-          return Token.LITERAL;
+          print(line, currentSpelling.toString(), toCurrentKind);
         }
     }
     return toCurrentKind;                 //After you replace this switch with your, remove this line.
@@ -245,7 +209,6 @@ public class Scanner{
     switch(currentChar){
       case ' ': case '\n': case '\r': case '\t':
         if(currentChar == '\n')
-          //idx = 1;
           line++;
         discard();
     }

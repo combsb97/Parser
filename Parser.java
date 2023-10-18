@@ -1,4 +1,6 @@
-/* Complete all the methods.
+/*
+Ben Combs
+Complete all the methods.
 EBNF of Mini Language
 Program" --> "("Sequence State")".
 Sequence --> "("Statements")".
